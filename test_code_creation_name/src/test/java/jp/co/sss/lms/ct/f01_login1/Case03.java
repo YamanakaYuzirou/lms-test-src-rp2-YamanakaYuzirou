@@ -62,10 +62,10 @@ public class Case03 {
 		//コース詳細画面上部の文字を取得
 		WebElement coursHeader = webDriver.findElement(By.cssSelector("li[class='active']"));
 
-		//コース詳細画面上部の文字が期待値通りか検証する
-		assertEquals("コース詳細", coursHeader.getText());
 		//Titleを取得し、コース詳細画面にアクセスできたか検証する
 		assertEquals("コース詳細 | LMS", webDriver.getTitle());
+		//コース詳細画面上部の文字が期待値通りか検証する
+		assertEquals("コース詳細", coursHeader.getText());
 
 		//エビデンス取得
 		getEvidence(new Object() {
