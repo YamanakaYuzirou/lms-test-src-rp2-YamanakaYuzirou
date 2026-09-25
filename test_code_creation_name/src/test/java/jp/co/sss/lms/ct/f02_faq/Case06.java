@@ -1,6 +1,10 @@
 package jp.co.sss.lms.ct.f02_faq;
 
 import static jp.co.sss.lms.ct.util.WebDriverUtils.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,6 +13,8 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 /**
  * 結合テスト よくある質問機能
@@ -35,42 +41,146 @@ public class Case06 {
 	@Order(1)
 	@DisplayName("テスト01 トップページURLでアクセス")
 	void test01() {
-		// TODO ここに追加
+		//ログイン画面を開く
+		goTo("http://localhost:8080/lms");
+
+		//Titleを取得し、ログイン画面にアクセスできたか確認する
+		assertEquals("ログイン | LMS", webDriver.getTitle());
+
+		//エビデンス取得
+		getEvidence(new Object() {
+		});
 	}
 
 	@Test
 	@Order(2)
 	@DisplayName("テスト02 初回ログイン済みの受講生ユーザーでログイン")
 	void test02() {
-		// TODO ここに追加
+		//ユーザーIDを入力
+		webDriver.findElement(By.id("loginId")).sendKeys("StudentAA01");
+		//パスワードを入力
+		webDriver.findElement(By.id("password")).sendKeys("StudentAA0123");
+		//ログインボタンを押下
+		webDriver.findElement(By.cssSelector("input[type='submit']")).submit();
+		//コース詳細画面上部の文字を取得
+		WebElement coursHeader = webDriver.findElement(By.cssSelector("li[class='active']"));
+
+		//Titleを取得し、コース詳細画面にアクセスできたか検証する
+		assertEquals("コース詳細 | LMS", webDriver.getTitle());
+		//コース詳細画面上部の文字が期待値通りか検証する
+		assertEquals("コース詳細", coursHeader.getText());
+
+		//エビデンス取得
+		getEvidence(new Object() {
+		});
 	}
 
 	@Test
 	@Order(3)
 	@DisplayName("テスト03 上部メニューの「ヘルプ」リンクからヘルプ画面に遷移")
 	void test03() {
-		// TODO ここに追加
+		//ヘッダーメニューの機能を押下する
+		webDriver.findElement(By.linkText("機能")).click();
+		//ドロップダウンリストの「ヘルプ」リンクを押下する
+		webDriver.findElement(By.linkText("ヘルプ")).click();
+		//ヘルプ画面の文字を取得
+		WebElement help = webDriver.findElement(By.tagName("h2"));
+
+		//Titleを取得し、ヘルプ画面にアクセスできたか検証する
+		assertEquals("ヘルプ | LMS", webDriver.getTitle());
+		//ヘルプ画面の文字が期待値通りか検証する
+		assertEquals("ヘルプ", help.getText());
+
+		//エビデンス取得
+		getEvidence(new Object() {
+		});
 	}
 
 	@Test
 	@Order(4)
 	@DisplayName("テスト04 「よくある質問」リンクからよくある質問画面を別タブに開く")
 	void test04() {
-		// TODO ここに追加
+		//元のウィンドウハンドルを取得
+		String oldWindow = webDriver.getWindowHandle();
+
+		//よくある質問リンクを押下する
+		webDriver.findElement(By.linkText("よくある質問")).click();
+
+		//開かれているウィンドウハンドルを全て取得
+		Set<String> newWindows = webDriver.getWindowHandles();
+
+		//元のウィンドウ以外のハンドルに切り替える
+		for (String windowHandle : newWindows) {
+			if (!windowHandle.equals(oldWindow)) {
+				webDriver.switchTo().window(windowHandle);
+				break;
+			}
+		}
+
+		//よくある質問画面の文字を取得
+		WebElement faq = webDriver.findElement(By.tagName("h2"));
+
+		//Titleを取得し、よくある質問画面にアクセスできたか検証する
+		assertEquals("よくある質問 | LMS", webDriver.getTitle());
+		//よくある質問画面の文字が期待値通りか検証する
+		assertEquals("よくある質問", faq.getText());
+
+		//エビデンス取得
+		getEvidence(new Object() {
+		});
 	}
 
 	@Test
 	@Order(5)
 	@DisplayName("テスト05 カテゴリ検索で該当カテゴリの検索結果だけ表示")
 	void test05() {
-		// TODO ここに追加
+		//カテゴリ検索の【研修関係】を押下する
+		webDriver.findElement(By.linkText("【研修関係】")).click();
+
+		//検索結果を取得する
+		List<WebElement> question = webDriver.findElements(By.id("question-h[${status.index}]"));
+
+		//検索結果が2件か検証する
+		assertEquals(2, question.size());
+
+		//【研修関係】の検索結果が期待値通りか検証する
+		assertEquals("Q.キャンセル料・途中退校について", question.get(0).getText());
+		assertEquals("Q.研修の申し込みはどのようにすれば良いですか？", question.get(1).getText());
+
+		//【研修関係】の検索結果が表示されているか検証する
+		assertTrue(question.get(0).isDisplayed());
+		assertTrue(question.get(1).isDisplayed());
+
+		//エビデンス取得用にスクロール
+		scrollBy("100");
+		//エビデンス取得
+		getEvidence(new Object() {
+		});
+
 	}
 
 	@Test
 	@Order(6)
 	@DisplayName("テスト06 検索結果の質問をクリックしその回答を表示")
 	void test06() {
-		// TODO ここに追加
+		//検索結果(質問)を取得する
+		List<WebElement> question = webDriver.findElements(By.id("question-h[${status.index}]"));
+		//検索結果(回答)を取得する
+		List<WebElement> answer = webDriver.findElements(By.id("answer-h[${status.index}]"));
+
+		//検索結果(質問)の数だけ繰り返す
+		for (int i = 0; i < question.size(); i++) {
+			//質問を押下
+			question.get(i).click();
+			//回答が表示されたか検証する
+			assertTrue(answer.get(i).isDisplayed());
+			//次の質問が画面内に収まるように、スクロールする
+			scrollBy("100");
+		}
+
+		//エビデンス取得
+		getEvidence(new Object() {
+		});
 	}
 
 }
