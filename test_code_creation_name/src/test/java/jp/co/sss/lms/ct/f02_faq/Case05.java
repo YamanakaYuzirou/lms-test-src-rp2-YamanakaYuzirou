@@ -142,12 +142,12 @@ public class Case05 {
 		//検索結果を取得する
 		List<WebElement> question = webDriver.findElements(By.id("question-h[${status.index}]"));
 
+		//表示された検索結果が１件のみか検証する
+		assertEquals(1, question.size());
 		//検索結果が期待値通りか検証する
 		assertEquals("Q.キャンセル料・途中退校について", question.get(0).getText());
 		//検索結果が表示されているか検証する
 		assertTrue(question.get(0).isDisplayed());
-		//表示された検索結果が１件のみか検証する
-		assertEquals(1, question.size());
 
 		//エビデンス取得用にスクロール
 		scrollBy("100");
