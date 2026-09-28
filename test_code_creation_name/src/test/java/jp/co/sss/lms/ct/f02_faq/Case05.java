@@ -167,7 +167,7 @@ public class Case05 {
 		WebElement keyword = webDriver.findElement(By.cssSelector("input[type='text']"));
 
 		//入力したキーワードが消去されていることを検証する
-		assertThat(keyword.getText()).isNullOrEmpty();
+		assertThat(keyword.getAttribute("value")).isNullOrEmpty();
 
 		//エビデンス取得
 		getEvidence(new Object() {
