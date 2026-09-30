@@ -1,6 +1,9 @@
 package jp.co.sss.lms.ct.f04_attendance;
 
 import static jp.co.sss.lms.ct.util.WebDriverUtils.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,6 +12,9 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
 
 /**
  * 結合テスト 勤怠管理機能
@@ -28,70 +34,356 @@ public class Case12 {
 	/** 後処理 */
 	@AfterAll
 	static void after() {
-		closeDriver();
+		//closeDriver();
 	}
 
 	@Test
 	@Order(1)
 	@DisplayName("テスト01 トップページURLでアクセス")
 	void test01() {
-		// TODO ここに追加
+		//ログイン画面を開く
+		goTo("http://localhost:8080/lms");
+
+		//Titleを取得し、ログイン画面にアクセスできたか確認する
+		assertEquals("ログイン | LMS", webDriver.getTitle());
+
+		//エビデンス取得
+		getEvidence(new Object() {
+		});
 	}
 
 	@Test
 	@Order(2)
 	@DisplayName("テスト02 初回ログイン済みの受講生ユーザーでログイン")
 	void test02() {
-		// TODO ここに追加
+		//ユーザーIDを入力
+		webDriver.findElement(By.id("loginId")).sendKeys("StudentAA01");
+		//パスワードを入力
+		webDriver.findElement(By.id("password")).sendKeys("StudentAA0123");
+		//ログインボタンを押下
+		webDriver.findElement(By.cssSelector("input[type='submit']")).submit();
+		//コース詳細画面上部の文字を取得
+		WebElement coursHeader = webDriver.findElement(By.cssSelector("li[class='active']"));
+
+		//Titleを取得し、コース詳細画面にアクセスできたか検証する
+		assertEquals("コース詳細 | LMS", webDriver.getTitle());
+		//コース詳細画面上部の文字が期待値通りか検証する
+		assertEquals("コース詳細", coursHeader.getText());
+
+		//エビデンス取得
+		getEvidence(new Object() {
+		});
 	}
 
 	@Test
 	@Order(3)
 	@DisplayName("テスト03 上部メニューの「勤怠」リンクから勤怠管理画面に遷移")
 	void test03() {
-		// TODO ここに追加
+		//勤怠リンクを押下して勤怠管理画面に遷移
+		webDriver.findElement(By.linkText("勤怠")).click();
+		//勤怠未入力メッセージを押下
+		webDriver.switchTo().alert().accept();
+		//勤怠管理画面の文字を取得
+		WebElement attendance = webDriver.findElement(By.tagName("h2"));
+
+		//Titleを取得し、勤怠管理画面にアクセスできたか検証する
+		assertEquals("勤怠情報変更｜LMS", webDriver.getTitle());
+		//勤怠管理画面上部の文字が期待値通りか検証する
+		assertEquals("勤怠管理", attendance.getText());
+
+		//エビデンス取得
+		getEvidence(new Object() {
+		});
 	}
 
 	@Test
 	@Order(4)
 	@DisplayName("テスト04 「勤怠情報を直接編集する」リンクから勤怠情報直接変更画面に遷移")
 	void test04() {
-		// TODO ここに追加
+		//リンクを押下して直接編集画面に遷移
+		webDriver.findElement(By.linkText("勤怠情報を直接編集する")).click();
+		//直接編集画面の文字を取得
+		WebElement attendance = webDriver.findElement(By.tagName("h2"));
+
+		//Titleを取得し、勤怠管理画面にアクセスできたか検証する
+		assertEquals("勤怠情報変更｜LMS", webDriver.getTitle());
+		//勤怠管理画面上部の文字が期待値通りか検証する
+		assertEquals("勤怠管理", attendance.getText());
+
+		//エビデンス取得
+		getEvidence(new Object() {
+		});
 	}
 
 	@Test
 	@Order(5)
 	@DisplayName("テスト05 不適切な内容で修正してエラー表示：出退勤の（時）と（分）のいずれかが空白")
 	void test05() {
-		// TODO ここに追加
+		//出勤時間を取得する
+		WebElement startHour = webDriver.findElement(By.id("startHour0"));
+		//出勤分を取得する
+		WebElement startMinute = webDriver.findElement(By.id("startMinute0"));
+		//退勤時間を取得する
+		WebElement endHour = webDriver.findElement(By.id("endHour0"));
+		//退勤分を取得する
+		WebElement endMinute = webDriver.findElement(By.id("endMinute0"));
+
+		//出勤時間を設定
+		Select select = new Select(startHour);
+		select.selectByIndex(0);
+
+		//出勤分を設定
+		select = new Select(startMinute);
+		select.selectByIndex(1);
+
+		//退勤時間を設定
+		select = new Select(endHour);
+		select.selectByIndex(10);
+
+		//退勤分を設定
+		select = new Select(endMinute);
+		select.selectByIndex(0);
+
+		//更新ボタンクリックのためにスクロール
+		scrollBy("300");
+
+		//更新ボタンを押下する
+		webDriver.findElement(By.cssSelector("input[value='更新']")).click();
+		//更新確認メッセージを押下
+		webDriver.switchTo().alert().accept();
+
+		//エラーを取得する
+		List<WebElement> errors = webDriver.findElements(By.cssSelector("span[class='help-inline error']"));
+
+		//エラーの数だけ繰り返す
+		for (WebElement error : errors) {
+			//エラーが表示されているか検証する
+			assertTrue(error.isDisplayed());
+		}
+
+		//エビデンス取得
+		getEvidence(new Object() {
+		});
 	}
 
 	@Test
 	@Order(6)
 	@DisplayName("テスト06 不適切な内容で修正してエラー表示：出勤が空白で退勤に入力あり")
 	void test06() {
-		// TODO ここに追加
+		//出勤時間を取得する
+		WebElement startHour = webDriver.findElement(By.id("startHour0"));
+		//出勤分を取得する
+		WebElement startMinute = webDriver.findElement(By.id("startMinute0"));
+		//退勤時間を取得する
+		WebElement endHour = webDriver.findElement(By.id("endHour0"));
+		//退勤分を取得する
+		WebElement endMinute = webDriver.findElement(By.id("endMinute0"));
+
+		//出勤時間を設定
+		Select select = new Select(startHour);
+		select.selectByIndex(0);
+
+		//出勤分を設定
+		select = new Select(startMinute);
+		select.selectByIndex(0);
+
+		//退勤時間を設定
+		select = new Select(endHour);
+		select.selectByIndex(19);
+
+		//退勤分を設定
+		select = new Select(endMinute);
+		select.selectByIndex(1);
+
+		//更新ボタンクリックのためにスクロール
+		scrollBy("300");
+
+		//更新ボタンを押下する
+		webDriver.findElement(By.cssSelector("input[value='更新']")).click();
+		//更新確認メッセージを押下
+		webDriver.switchTo().alert().accept();
+
+		//エラーを取得する
+		List<WebElement> errors = webDriver.findElements(By.cssSelector("span[class='help-inline error']"));
+
+		//エラーの数だけ繰り返す
+		for (WebElement error : errors) {
+			//エラーが表示されているか検証する
+			assertTrue(error.isDisplayed());
+		}
+
+		//エビデンス取得
+		getEvidence(new Object() {
+		});
 	}
 
 	@Test
 	@Order(7)
 	@DisplayName("テスト07 不適切な内容で修正してエラー表示：出勤が退勤よりも遅い時間")
 	void test07() {
-		// TODO ここに追加
+		//出勤時間を取得する
+		WebElement startHour = webDriver.findElement(By.id("startHour0"));
+		//出勤分を取得する
+		WebElement startMinute = webDriver.findElement(By.id("startMinute0"));
+		//退勤時間を取得する
+		WebElement endHour = webDriver.findElement(By.id("endHour0"));
+		//退勤分を取得する
+		WebElement endMinute = webDriver.findElement(By.id("endMinute0"));
+
+		//出勤時間を設定
+		Select select = new Select(startHour);
+		select.selectByIndex(19);
+
+		//出勤分を設定
+		select = new Select(startMinute);
+		select.selectByIndex(31);
+
+		//退勤時間を設定
+		select = new Select(endHour);
+		select.selectByIndex(19);
+
+		//退勤分を設定
+		select = new Select(endMinute);
+		select.selectByIndex(1);
+
+		//更新ボタンクリックのためにスクロール
+		scrollBy("300");
+
+		//更新ボタンを押下する
+		webDriver.findElement(By.cssSelector("input[value='更新']")).click();
+		//更新確認メッセージを押下
+		webDriver.switchTo().alert().accept();
+
+		//エラーを取得する
+		List<WebElement> errors = webDriver.findElements(By.cssSelector("span[class='help-inline error']"));
+
+		//エラーの数だけ繰り返す
+		for (WebElement error : errors) {
+			//エラーが表示されているか検証する
+			assertTrue(error.isDisplayed());
+		}
+
+		//エビデンス取得
+		getEvidence(new Object() {
+		});
 	}
 
 	@Test
 	@Order(8)
 	@DisplayName("テスト08 不適切な内容で修正してエラー表示：出退勤時間を超える中抜け時間")
 	void test08() {
-		// TODO ここに追加
+		//出勤時間を取得する
+		WebElement startHour = webDriver.findElement(By.id("startHour0"));
+		//出勤分を取得する
+		WebElement startMinute = webDriver.findElement(By.id("startMinute0"));
+		//退勤時間を取得する
+		WebElement endHour = webDriver.findElement(By.id("endHour0"));
+		//退勤分を取得する
+		WebElement endMinute = webDriver.findElement(By.id("endMinute0"));
+		//中抜け時間を取得する
+		WebElement blankTime = webDriver.findElement(By.cssSelector("select[name='attendanceList[0].blankTime']"));
+
+		//出勤時間を設定
+		Select select = new Select(startHour);
+		select.selectByIndex(10);
+
+		//出勤分を設定
+		select = new Select(startMinute);
+		select.selectByIndex(1);
+
+		//退勤時間を設定
+		select = new Select(endHour);
+		select.selectByIndex(13);
+
+		//退勤分を設定
+		select = new Select(endMinute);
+		select.selectByIndex(1);
+
+		//中抜け時間を設定
+		select = new Select(blankTime);
+		select.selectByIndex(16);
+
+		//更新ボタンクリックのためにスクロール
+		scrollBy("300");
+
+		//更新ボタンを押下する
+		webDriver.findElement(By.cssSelector("input[value='更新']")).click();
+		//更新確認メッセージを押下
+		webDriver.switchTo().alert().accept();
+
+		//エラーを取得する
+		List<WebElement> errors = webDriver.findElements(By.cssSelector("span[class='help-inline error']"));
+
+		//エラーの数だけ繰り返す
+		for (WebElement error : errors) {
+			//エラーが表示されているか検証する
+			assertTrue(error.isDisplayed());
+		}
+
+		//エビデンス取得
+		getEvidence(new Object() {
+		});
 	}
 
 	@Test
 	@Order(9)
 	@DisplayName("テスト09 不適切な内容で修正してエラー表示：備考が100文字超")
 	void test09() {
-		// TODO ここに追加
+		//出勤時間を取得する
+		WebElement startHour = webDriver.findElement(By.id("startHour0"));
+		//出勤分を取得する
+		WebElement startMinute = webDriver.findElement(By.id("startMinute0"));
+		//退勤時間を取得する
+		WebElement endHour = webDriver.findElement(By.id("endHour0"));
+		//退勤分を取得する
+		WebElement endMinute = webDriver.findElement(By.id("endMinute0"));
+		//備考を取得する
+		WebElement note = webDriver.findElement(By.cssSelector("input[type='text']"));
+
+		//出勤時間を設定
+		Select select = new Select(startHour);
+		select.selectByIndex(10);
+
+		//出勤分を設定
+		select = new Select(startMinute);
+		select.selectByIndex(1);
+
+		//退勤時間を設定
+		select = new Select(endHour);
+		select.selectByIndex(19);
+
+		//退勤分を設定
+		select = new Select(endMinute);
+		select.selectByIndex(1);
+
+		//備考入力用の文字を作成
+		String noteStr = "いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせすんいろはに"
+				+ "ほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせすんいろはにほ";
+
+		//備考を入力
+		note.clear();
+		note.sendKeys(noteStr);
+
+		//更新ボタンクリックのためにスクロール
+		scrollBy("300");
+
+		//更新ボタンを押下する
+		webDriver.findElement(By.cssSelector("input[value='更新']")).click();
+		//更新確認メッセージを押下
+		webDriver.switchTo().alert().accept();
+
+		//エラーを取得する
+		List<WebElement> errors = webDriver.findElements(By.cssSelector("span[class='help-inline error']"));
+
+		//エラーの数だけ繰り返す
+		for (WebElement error : errors) {
+			//エラーが表示されているか検証する
+			assertTrue(error.isDisplayed());
+		}
+
+		//エビデンス取得
+		getEvidence(new Object() {
+		});
 	}
 
 }
